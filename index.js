@@ -1,4 +1,5 @@
 const express = require("express");
+const stripe = new Stripe(process.env.STRIPE_SECRET);
 
 const cors = require("cors");
 
@@ -174,6 +175,28 @@ async function run() {
       );
 
       res.send({ success: true });
+    });
+    const stripe = new Stripe(process.env.STRIPE_SECRET);
+
+    app.post("/create-checkout-session", verifyToken, async (req, res) => {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: "bdt",
+              product_data: { name: "Digital Life Lessons Premium" },
+              unit_amount: 1500 * 100,
+            },
+            quantity: 1,
+          },
+        ],
+        success_url: `${process.env.CLIENT_URL}/payment/success`,
+        cancel_url: `${process.env.CLIENT_URL}/payment/cancel`,
+      });
+
+      res.send({ url: session.url });
     });
 
     // Send a ping to confirm a successful connection
