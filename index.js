@@ -160,6 +160,11 @@ async function run() {
       await users.insertOne(user);
       res.send({ message: "User created" });
     });
+    app.get("/users/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      const user = await users.findOne({ email });
+      res.send(user);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
