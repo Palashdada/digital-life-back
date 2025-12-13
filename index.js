@@ -13,16 +13,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const serviceAccount = {
-  //   type: process.env.FIREBASE_TYPE,
-  //   project_id: process.env.FIREBASE_PROJECT_ID,
-  //   private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-  //   private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-  //   client_email: process.env.FIREBASE_CLIENT_EMAIL,
-  //   client_id: process.env.FIREBASE_CLIENT_ID,
-  //   auth_uri: process.env.FIREBASE_AUTH_URI,
-  //   token_uri: process.env.FIREBASE_TOKEN_URI,
-  //   auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
-  //   client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
+  type: process.env.FIREBASE_TYPE,
+  project_id: process.env.FIREBASE_PROJECT_ID,
+  private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
+  private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  client_email: process.env.FIREBASE_CLIENT_EMAIL,
+  client_id: process.env.FIREBASE_CLIENT_ID,
+  auth_uri: process.env.FIREBASE_AUTH_URI,
+  token_uri: process.env.FIREBASE_TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+  client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL,
 };
 
 admin.initializeApp({
@@ -58,8 +58,7 @@ async function isAdmin(req, res, next) {
   return res.status(403).send({ message: "Forbidden: Admin only" });
 }
 const { MongoClient, ServerApiVersion } = require("mongodb");
-const uri =
-  "mongodb+srv://digitalLifeLessons:pyiizRObRZQu2BVk@cluster0.hgrlmye.mongodb.net/digitalLife?retryWrites=true&w=majority";
+const uri = process.env.MONGO_URI;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -147,6 +146,19 @@ async function run() {
     app.get("/admin/reports", verifyToken, isAdmin, async (req, res) => {
       const list = await reports.find({}).toArray();
       res.send(list);
+    });
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const exist = await users.findOne({ email: user.email });
+
+      if (exist) return res.send({ message: "User already exists" });
+
+      user.role = "user";
+      user.isPremium = false;
+      user.createdAt = new Date();
+
+      await users.insertOne(user);
+      res.send({ message: "User created" });
     });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
