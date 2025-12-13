@@ -165,6 +165,17 @@ async function run() {
       const user = await users.findOne({ email });
       res.send(user);
     });
+    app.post("/payment-success", verifyToken, async (req, res) => {
+      const email = req.user.email;
+
+      const result = await users.updateOne(
+        { email },
+        { $set: { isPremium: true } }
+      );
+
+      res.send({ success: true });
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
