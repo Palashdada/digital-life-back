@@ -259,6 +259,12 @@ async function run() {
       );
       res.send({ success: true });
     });
+    app.get("/admin/stats", verifyToken, isAdmin, async (req, res) => {
+      const totalUsers = await users.countDocuments();
+      const totalLessons = await lessons.countDocuments();
+      const reportedLessons = await reports.countDocuments();
+      res.send({ totalUsers, totalLessons, reportedLessons });
+    });
 
     // Ping Test
     await client.db("admin").command({ ping: 1 });
