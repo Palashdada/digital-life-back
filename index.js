@@ -273,6 +273,10 @@ async function run() {
       const allLessons = await lessons.find({}).toArray();
       res.send(allLessons);
     });
+    app.get("/admin/reports", verifyToken, isAdmin, async (req, res) => {
+      const allReports = await reports.find({}).toArray();
+      res.send(allReports);
+    });
 
     // Ping TestJ
     await client.db("admin").command({ ping: 1 });
