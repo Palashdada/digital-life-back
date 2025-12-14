@@ -269,6 +269,11 @@ async function run() {
       const allUsers = await users.find({}).toArray();
       res.send(allUsers);
     });
+    app.get("/admin/lessons", verifyToken, isAdmin, async (req, res) => {
+      const allLessons = await lessons.find({}).toArray();
+      res.send(allLessons);
+    });
+
     // Ping TestJ
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged MongoDB successfully");
